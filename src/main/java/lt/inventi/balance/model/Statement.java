@@ -27,6 +27,10 @@ public class Statement {
     @Column(name = "currency")
     private String currency;
 
+    public Integer getId() {
+        return id;
+    }
+
     public String getAccountNumber() {
         return accountNumber;
     }
