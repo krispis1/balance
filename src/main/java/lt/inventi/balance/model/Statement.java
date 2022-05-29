@@ -1,11 +1,8 @@
 package lt.inventi.balance.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 @Entity
@@ -15,17 +12,29 @@ public class Statement {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
     @Column(name = "account_number")
+    @NotEmpty
     private String accountNumber;
     @Column(name = "operation_time")
+    @NotNull
     private Timestamp operationTime;
     @Column(name = "beneficiary")
+    @NotEmpty
     private String beneficiary;
     @Column(name = "comment")
     private String comment;
     @Column(name = "amount")
+    @NotNull
     private double amount;
     @Column(name = "currency")
-    private String currency;
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private Currency currency;
+
+    public enum Currency {
+        GBP,
+        EUR,
+        USD
+    }
 
     public Integer getId() {
         return id;
@@ -71,11 +80,11 @@ public class Statement {
         this.amount = amount;
     }
 
-    public String getCurrency() {
+    public Currency getCurrency() {
         return currency;
     }
 
-    public void setCurrency(String currency) {
+    public void setCurrency(Currency currency) {
         this.currency = currency;
     }
 }
