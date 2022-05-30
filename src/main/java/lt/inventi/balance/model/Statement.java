@@ -1,5 +1,7 @@
 package lt.inventi.balance.model;
 
+import lt.inventi.balance.util.CurrencyUtil.Currency;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -9,8 +11,9 @@ import java.sql.Timestamp;
 @Table(name = "statements")
 public class Statement {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "statement_id")
+    private Integer statementId;
     @Column(name = "account_number")
     @NotEmpty
     private String accountNumber;
@@ -24,20 +27,26 @@ public class Statement {
     private String comment;
     @Column(name = "amount")
     @NotNull
-    private double amount;
+    private Double amount;
     @Column(name = "currency")
     @Enumerated(EnumType.STRING)
     @NotNull
     private Currency currency;
 
-    public enum Currency {
-        GBP,
-        EUR,
-        USD
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name="account_id", nullable=false)
+    private Account account;
+
+    public Account getAccount() {
+        return account;
     }
 
-    public Integer getId() {
-        return id;
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Integer getStatementId() {
+        return statementId;
     }
 
     public String getAccountNumber() {
@@ -72,11 +81,11 @@ public class Statement {
         this.comment = comment;
     }
 
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

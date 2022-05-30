@@ -1,6 +1,7 @@
 package lt.inventi.balance.util;
 
 import lt.inventi.balance.model.Statement;
+import lt.inventi.balance.util.CurrencyUtil.Currency;
 import org.apache.commons.csv.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,7 @@ public class StatementCsvUtil {
         ACCOUNT_NUMBER, OPERATION_TIME, BENEFICIARY, COMMENT, AMOUNT, CURRENCY
     }
     public static final String TYPE = "text/csv";
+    public static final String FILE_NAME = "statements.csv";
 
     public static boolean isCsv(MultipartFile file) {
         return TYPE.equals(file.getContentType());
@@ -34,7 +36,7 @@ public class StatementCsvUtil {
                 statement.setBeneficiary(csvRecord.get(header.BENEFICIARY));
                 statement.setComment(csvRecord.get(header.COMMENT));
                 statement.setAmount(Double.parseDouble(csvRecord.get(header.AMOUNT)));
-                statement.setCurrency(Statement.Currency.valueOf(csvRecord.get(header.CURRENCY)));
+                statement.setCurrency(Currency.valueOf(csvRecord.get(header.CURRENCY)));
                 statements.add(statement);
             }
             return statements;

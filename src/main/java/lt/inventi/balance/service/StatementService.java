@@ -1,5 +1,6 @@
 package lt.inventi.balance.service;
 
+import lt.inventi.balance.model.Account;
 import lt.inventi.balance.model.Statement;
 import lt.inventi.balance.repository.StatementRepository;
 import lt.inventi.balance.util.StatementCsvUtil;
@@ -16,10 +17,17 @@ import java.util.List;
 public class StatementService {
     @Autowired
     private StatementRepository statementRepository;
+    @Autowired
+    private AccountService accountService;
 
     public void saveStatements(MultipartFile file) {
         try {
             List<Statement> statements = StatementCsvUtil.parseCsv(file.getInputStream());
+            for (Statement statement : statements) {
+                Account account = accountService.saveAccount(statement.getAccountNumber(), statement.getCurrency());
+                accountService.updateBalance(account, statement.getAmount(), statement.getCurrency());
+                statement.setAccount(account);
+            }
             statementRepository.saveAll(statements);
         } catch (IOException e) {
             throw new RuntimeException("Failed to store CSV data: " + e.getMessage());

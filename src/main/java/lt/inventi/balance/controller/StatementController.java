@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/statement")
 public class StatementController {
@@ -32,10 +34,10 @@ public class StatementController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity<Resource> exportFile(@RequestParam(required = false, defaultValue = "") String tsFrom, @RequestParam(required = false, defaultValue = "") String tsTo) {
-        InputStreamResource file = new InputStreamResource(statementService.exportStatements(tsFrom, tsTo));
+    public ResponseEntity<Resource> exportFile(@RequestParam Optional<String> tsFrom, @RequestParam Optional<String> tsTo) {
+        InputStreamResource file = new InputStreamResource(statementService.exportStatements(tsFrom.orElseGet(() -> ""), tsTo.orElseGet(() -> "")));
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statements.csv\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + StatementCsvUtil.FILE_NAME)
                 .contentType(MediaType.parseMediaType(StatementCsvUtil.TYPE))
                 .body(file);
     }
