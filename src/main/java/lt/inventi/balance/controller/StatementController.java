@@ -38,7 +38,7 @@ public class StatementController {
         InputStreamResource file = new InputStreamResource(statementService.exportStatements(Timestamp.valueOf("2022-05-29 21:45:24"), Timestamp.valueOf("2022-05-29 21:45:24")));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statements.csv\"")
-                .contentType(MediaType.parseMediaType("application/csv"))
+                .contentType(MediaType.parseMediaType("text/csv"))
                 .body(file);
     }
 }
