@@ -1,13 +1,8 @@
 package lt.inventi.balance.controller;
 
 import lt.inventi.balance.service.AccountService;
-import lt.inventi.balance.util.StatementCsvUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,9 +18,17 @@ public class AccountController {
     private AccountService accountService;
 
     @GetMapping("/balance")
-    public ResponseEntity<String> getBalance(@RequestParam String accountNumber ,@RequestParam Optional<String> tsFrom, @RequestParam Optional<String> tsTo) {
+    public ResponseEntity<String> getBalance(@RequestParam String accountNumber, @RequestParam Optional<String> tsFrom, @RequestParam Optional<String> tsTo) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body("Balance: " + accountService.calculateBalance(accountNumber ,tsFrom.orElseGet(() -> ""), tsTo.orElseGet(() -> "")));
+            if (!tsFrom.isPresent() && !tsTo.isPresent()) {
+                return ResponseEntity.status(HttpStatus.OK).body("Balance: " + accountService.calculateFullBalance(accountNumber) + " " + accountService.getAccount(accountNumber).getCurrency());
+            } else if (!tsFrom.isPresent()) {
+                return ResponseEntity.status(HttpStatus.OK).body("Balance: " + accountService.calculateBalanceUntil(accountNumber, tsTo.orElseGet(() -> "")) + " " + accountService.getAccount(accountNumber).getCurrency());
+            } else if (!tsTo.isPresent()) {
+                return ResponseEntity.status(HttpStatus.OK).body("Balance: " + accountService.calculateBalanceFrom(accountNumber, tsFrom.orElseGet(() -> "")) + " " + accountService.getAccount(accountNumber).getCurrency());
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body("Balance: " + accountService.calculateBalanceBetween(accountNumber ,tsFrom.orElseGet(() -> ""), tsTo.orElseGet(() -> "")) + " " + accountService.getAccount(accountNumber).getCurrency());
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Could not calculate balance.\nReason: " + e.getMessage());
         }

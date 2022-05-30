@@ -4,7 +4,6 @@ import lt.inventi.balance.model.Account;
 import lt.inventi.balance.util.CurrencyUtil;
 import lt.inventi.balance.util.CurrencyUtil.Currency;
 import lt.inventi.balance.repository.AccountRepository;
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +14,27 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
+    public Account getAccount(String accountNumber) {
+        if (accountRepository.existsByAccountNumber(accountNumber)) {
+            return accountRepository.findByAccountNumber(accountNumber);
+        } else {
+            throw new RuntimeException("Account not found: " + accountNumber);
+        }
+    }
+
     public Account saveAccount(String accountNumber, Currency currency) {
+        if (accountNumber.isEmpty())
+            throw new RuntimeException("Account number can't be empty");
+
+        if (currency == null)
+            throw new RuntimeException("Currency can't be empty");
+
         if (!accountRepository.existsByAccountNumber(accountNumber)) {
             Account account = new Account();
             account.setAccountNumber(accountNumber);
             account.setAmount(0D);
             account.setCurrency(currency);
-            return accountRepository.saveAndFlush(account);
+            return accountRepository.save(account);
         }
         return accountRepository.findByAccountNumber(accountNumber);
     }
@@ -31,31 +44,50 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public Double calculateBalance(String accountNumber, String tsFrom, String tsTo) {
-        if (tsFrom.isEmpty() && tsTo.isEmpty()) {
-            try {
-                return accountRepository.findByAccountNumber(accountNumber).getAmount();
-            } catch (Exception e) {
-                throw new NullPointerException("Account not found: " + accountNumber);
+    public Double calculateFullBalance(String accountNumber) {
+        try {
+            return getAccount(accountNumber).getAmount();
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Encountered error while calculating balance: " + e.getMessage());
+        }
+    }
+
+    public Double calculateBalanceUntil(String accountNumber, String tsTo) {
+        try {
+            Double amount = accountRepository.getBalanceUntil(Timestamp.valueOf(tsTo), accountNumber);
+            if (amount != null) {
+                return amount;
+            } else {
+                throw new NullPointerException("Amount doesn't exist until date: " + tsTo);
             }
-        } else if (tsFrom.isEmpty()) {
-            try {
-                return accountRepository.getBalanceUntil(Timestamp.valueOf(tsTo), accountNumber);
-            } catch (Exception e) {
-                throw new NullPointerException("Account not found: " + accountNumber);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Encountered error while calculating balance: " + e.getMessage());
+        }
+    }
+
+    public Double calculateBalanceFrom(String accountNumber, String tsFrom) {
+        try {
+            Double amount = accountRepository.getBalanceFrom(Timestamp.valueOf(tsFrom), accountNumber);
+            if (amount != null) {
+                return amount;
+            } else {
+                throw new NullPointerException("Amount doesn't exist from date: " + tsFrom);
             }
-        } else if (tsTo.isEmpty()) {
-            try {
-                return accountRepository.getBalanceFrom(Timestamp.valueOf(tsFrom), accountNumber);
-            } catch (Exception e) {
-                throw new NullPointerException("Account not found: " + accountNumber);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Encountered error while calculating balance: " + e.getMessage());
+        }
+    }
+
+    public Double calculateBalanceBetween(String accountNumber, String tsFrom, String tsTo) {
+        try {
+            Double amount = accountRepository.getBalanceBetween(Timestamp.valueOf(tsFrom), Timestamp.valueOf(tsTo), accountNumber);
+            if (amount != null) {
+                return amount;
+            } else {
+                throw new NullPointerException("Amount doesn't exist for dates: " + tsFrom + " / " + tsTo);
             }
-        } else {
-            try {
-                return accountRepository.getBalanceBetween(Timestamp.valueOf(tsFrom), Timestamp.valueOf(tsTo), accountNumber);
-            } catch (Exception e) {
-                throw new NullPointerException("Account not found: " + accountNumber);
-            }
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Encountered error while calculating balance: " + e.getMessage());
         }
     }
 }

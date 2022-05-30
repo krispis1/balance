@@ -16,16 +16,20 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "account_id")
     private Integer accountId;
+
     @Column(name = "account_number", unique = true)
     @NotEmpty
     private String accountNumber;
+
     @Column(name = "amount")
     @NotNull
     private Double amount;
+
     @Column(name = "currency")
     @Enumerated(EnumType.STRING)
     @NotNull
     private Currency currency;
+
     @OneToMany(mappedBy="account")
     private Set<Statement> statements;
 }
