@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/statement")
@@ -34,8 +35,8 @@ public class StatementController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity<Resource> exportFile() {
-        InputStreamResource file = new InputStreamResource(statementService.exportStatements(Timestamp.valueOf("2022-05-29 21:45:24"), Timestamp.valueOf("2022-05-29 21:45:24")));
+    public ResponseEntity<Resource> exportFile(@RequestParam(required = false, defaultValue = "") String tsFrom, @RequestParam(required = false, defaultValue = "") String tsTo) {
+        InputStreamResource file = new InputStreamResource(statementService.exportStatements(tsFrom, tsTo));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statements.csv\"")
                 .contentType(MediaType.parseMediaType("text/csv"))

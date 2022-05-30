@@ -52,7 +52,7 @@ public class StatementCsvUtil {
             for (Statement statement : statements) {
                 csvPrinter.printRecord(
                         statement.getAccountNumber(),
-                        statement.getAccountNumber(),
+                        statement.getOperationTime(),
                         statement.getBeneficiary(),
                         statement.getComment(),
                         statement.getAmount(),
