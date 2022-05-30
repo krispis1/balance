@@ -36,7 +36,7 @@ public class StatementController {
         InputStreamResource file = new InputStreamResource(statementService.exportStatements(tsFrom, tsTo));
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"statements.csv\"")
-                .contentType(MediaType.parseMediaType("text/csv"))
+                .contentType(MediaType.parseMediaType(StatementCsvUtil.TYPE))
                 .body(file);
     }
 }

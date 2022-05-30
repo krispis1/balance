@@ -14,7 +14,7 @@ public class StatementCsvUtil {
     public enum header {
         ACCOUNT_NUMBER, OPERATION_TIME, BENEFICIARY, COMMENT, AMOUNT, CURRENCY
     }
-    static final String TYPE = "text/csv";
+    public static final String TYPE = "text/csv";
 
     public static boolean isCsv(MultipartFile file) {
         return TYPE.equals(file.getContentType());
