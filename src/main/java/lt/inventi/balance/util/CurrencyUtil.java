@@ -1,7 +1,5 @@
 package lt.inventi.balance.util;
 
-import net.bytebuddy.implementation.bytecode.Throw;
-
 public class CurrencyUtil {
     public enum Currency {
         EUR, GBP, USD
