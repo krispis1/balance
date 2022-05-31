@@ -34,18 +34,35 @@ public class StatementService {
         }
     }
 
-    public ByteArrayInputStream exportStatements(String tsFrom, String tsTo) {
-        List<Statement> statements;
-
-        if (tsFrom.isEmpty() && tsTo.isEmpty()) {
-            statements = statementRepository.findAll();
-        } else if (tsFrom.isEmpty()) {
-            statements = statementRepository.findAllWithOperationTimeBefore(Timestamp.valueOf(tsTo));
-        } else if (tsTo.isEmpty()) {
-            statements = statementRepository.findAllWithOperationTimeAfter(Timestamp.valueOf(tsFrom));
-        } else {
-            statements = statementRepository.findAllByOperationTimeBetween(Timestamp.valueOf(tsFrom), Timestamp.valueOf(tsTo));
-        }
+    public ByteArrayInputStream exportAllStatements() {
+        List<Statement> statements = statementRepository.findAll();
         return StatementCsvUtil.buildCsv(statements);
+    }
+
+    public ByteArrayInputStream exportAllStatementsUntil(String tsTo) {
+        try {
+            List<Statement> statements = statementRepository.findAllWithOperationTimeBefore(Timestamp.valueOf(tsTo));
+            return StatementCsvUtil.buildCsv(statements);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error encountered when exporting statements: " + e.getMessage());
+        }
+    }
+
+    public ByteArrayInputStream exportAllStatementsAfter(String tsFrom) {
+        try {
+            List<Statement> statements = statementRepository.findAllWithOperationTimeAfter(Timestamp.valueOf(tsFrom));
+            return StatementCsvUtil.buildCsv(statements);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error encountered when exporting statements: " + e.getMessage());
+        }
+    }
+
+    public ByteArrayInputStream exportAllStatementsBetween(String tsFrom, String tsTo) {
+        try {
+            List<Statement> statements = statementRepository.findAllByOperationTimeBetween(Timestamp.valueOf(tsFrom), Timestamp.valueOf(tsTo));
+            return StatementCsvUtil.buildCsv(statements);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error encountered when exporting statements: " + e.getMessage());
+        }
     }
 }

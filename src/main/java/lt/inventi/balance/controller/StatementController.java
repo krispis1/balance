@@ -3,6 +3,7 @@ package lt.inventi.balance.controller;
 import lt.inventi.balance.service.StatementService;
 import lt.inventi.balance.util.StatementCsvUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -35,10 +36,24 @@ public class StatementController {
 
     @GetMapping("/export")
     public ResponseEntity<Resource> exportFile(@RequestParam Optional<String> tsFrom, @RequestParam Optional<String> tsTo) {
-        InputStreamResource file = new InputStreamResource(statementService.exportStatements(tsFrom.orElseGet(() -> ""), tsTo.orElseGet(() -> "")));
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + StatementCsvUtil.FILE_NAME)
-                .contentType(MediaType.parseMediaType(StatementCsvUtil.TYPE))
-                .body(file);
+        try {
+            InputStreamResource file;
+
+            if (!tsFrom.isPresent() && !tsTo.isPresent()) {
+                file = new InputStreamResource(statementService.exportAllStatements());
+            } else if (!tsFrom.isPresent()) {
+                file = new InputStreamResource(statementService.exportAllStatementsUntil(tsTo.orElseGet(() -> "")));
+            } else if (!tsTo.isPresent()) {
+                file = new InputStreamResource(statementService.exportAllStatementsAfter(tsFrom.orElseGet(() -> "")));
+            } else {
+                file = new InputStreamResource(statementService.exportAllStatementsBetween(tsFrom.orElseGet(() -> ""), tsTo.orElseGet(() -> "")));
+            }
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + StatementCsvUtil.FILE_NAME)
+                    .contentType(MediaType.parseMediaType(StatementCsvUtil.TYPE))
+                    .body(file);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ByteArrayResource(("Could not export CSV: " + e.getMessage()).getBytes()));
+        }
     }
 }

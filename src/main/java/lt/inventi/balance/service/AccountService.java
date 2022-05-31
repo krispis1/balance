@@ -47,7 +47,7 @@ public class AccountService {
     public Double calculateFullBalance(String accountNumber) {
         try {
             return getAccount(accountNumber).getAmount();
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Encountered error while calculating balance: " + e.getMessage());
         }
     }
