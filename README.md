@@ -1,6 +1,7 @@
 # Bank Account Balance manager
 
-Download and install [MySql Server](https://dev.mysql.com/downloads/mysql/) for your OS
+Download and install [MySql Server](https://dev.mysql.com/downloads/mysql/) for your OS.
+***Don't select SHA256 as authentication method! Use the old one***
 
 Set up ***root*** db user to have matching password ***root***
 
